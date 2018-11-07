@@ -1,0 +1,128 @@
+FORMAT: 1A
+# GECO
+
+Gestor de Corpus 
+
+## group Post Views
+
+### Create User [POST /registro-usuario]
+
+Crea un nuevo usuario mientras no exista el nombre y/o este resgistrado el correo electrónico
+
++ Attributes
+    + email (string) - Correo electrónico del usuario
+    + user_name (string) - Nombre de usuario
+    + password (string) - Contraseña del usuario
+
++ Response 201 (application/json)
+    + Body
+    
+            {
+                "email": "usuario@gmail.com",
+                "user_name": "nombre usuario",
+                "password": "1234qwe"
+            }
+        
++ Response 409 (application/json)
+    Si el usuario o el correo ya están registrados en la base de datos
+    + Body
+    
++ Response 400 (application/json)
+    Cuando algún parámetro se manda de forma erronea
+    + Body
+
+### Create Project [POST /crear-proyecto-normal]
+
+Crea un nuevo proyecto
++ Request
+    + Headers
+    
+            Authorization: Bearer
+
++ Attributes
+    + name (string) - Nombre del proyecto
+
++ Response 201 (application/json)
+    + Body
+    
+            {
+                "name": "Mi proyecto"
+            }
+            
+<!-- <problema con esta respuesta> -->           
++ Response 409
+    
+
+### Upload Document [POST /upload1]
+
+Sube documentos al proyecto
+
++ Attributes
+    + file (object) - El documento
+    + name (string) - Nombre del documento
+    + owner (object) - Un usuario
+    + project (object) - Un proyecto
+    
++ Response 201 (application/json)
+    + Body
+    
+            {
+                "file": "Mi Documento"
+                "project": "Mi proyecto"
+            }
+
+### Create Metadata [POST /crear-md-proyecto-nor]
+
+Agrega los metadatos deseados por el usuario que tenga las credenciales necesarias
+
++ Attributes
+    + name (string) - Nombre del metadato
+    + project (object) - Projecto al que pertenece el documento donde se agregará el metadato
+    
++ Response 201 (application/json)
+    + Body
+    
+            {
+                "name": "nuevo metadato"
+                "project": "Mi proyecto"
+            }
+
+### Create Parallel Project [POST /crear-proyecto-paralelo]
+
+Crea un nuevo proyecto paralelo
+
++ Attributes
+    + owner (object) - Un usuario
+    + name (string) - Nombre del proyecto paralelo
+    
++ Response 201 (application/json)
+    + Body
+    
+            {
+                "name": "Mi proyecto paralelo"
+            }
+
+### Create Parallel Metadata [POST /crear-md-proyecto-par]
+
+Agrega los metadatos deseados por el usuario que tenga las credenciales necesarias en un proyecto paralelo
+
++ Attributes
+    + name (string) - Nombre del metadato
+    + project (object) - Projecto paralelo al que pertenece el documento donde se agregará el metadato
+    
++ Response 201 (application/json)
+    + Body
+    
+            {
+                "name": "nuevo metadato",
+                "proyecto" "Mi proyecto paralelo"
+            }
+
+### Document-Metadata Relation [POST /rel-doc-metadato]
+
+Establece una relación entre el documento y el o los metadatos
+
++ Attributes
+    + metadata (string)
+    + document
+    + data
