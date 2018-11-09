@@ -1,11 +1,29 @@
 FORMAT: 1A
 # GECO
 
-Gestor de Corpus 
+Gestor de Corpus
 
-## group Post Views
+## group Authentication
 
-### Create User [POST /registro-usuario]
+### Get an access token [POST /api-token-auth/]
+
+Una vez que el usuario queda registrado se crea un token con el que se registrará que está activo y de esta manera pueda realizar las diferentes acciones sobre GECO
+
++ Attributes
+    + email (string) - Correo electrónico del usuario
+    + user_name (string) - Nombre de usuario
+    + password (string) - Contraseña del usuario
+    
++ Response 200 (application/json)
+    + Body
+    
+            {
+                "token": "JUHhhjsahdkadb7gewrr89rhwec2VyX2lkIjoxNSwidXNlcm5hbWUiOiJnYXRlc29mc2lsZW50QGhvdG1haWwuY29tIiwiZXhwIjoxNTQxNjM3ODMyLCJlbWFpbCI6ImdhdGVzb2ZzaWxlbnRAaG90bWFhhsadayssYGUGS9"
+            }
+
+## group Create Methods
+
+### Create User [POST /gestion/registro-usuario]
 
 Crea un nuevo usuario mientras no exista el nombre y/o este resgistrado el correo electrónico
 
@@ -24,14 +42,17 @@ Crea un nuevo usuario mientras no exista el nombre y/o este resgistrado el corre
             }
         
 + Response 409 (application/json)
-    Si el usuario o el correo ya están registrados en la base de datos
     + Body
     
+            {
+                "error": "El nombre de usuario o correo ya existe"
+            }
+    
 + Response 400 (application/json)
-    Cuando algún parámetro se manda de forma erronea
+    Cuando algún parámetro se manda de forma errónea
     + Body
 
-### Create Project [POST /crear-proyecto-normal]
+### Create Project [POST /gestion/crear-proyecto-normal]
 
 Crea un nuevo proyecto
 + Request
@@ -48,36 +69,64 @@ Crea un nuevo proyecto
             {
                 "name": "Mi proyecto"
             }
-            
-<!-- <problema con esta respuesta> -->           
-+ Response 409
-    
 
-### Upload Document [POST /upload1]
+          
+<!-- problema con esta respuesta -->           
++ Response 409
+
+
+### Upload Document [POST /gestion/upload1]
 
 Sube documentos al proyecto
+
++ Request
+    + Headers
+    
+            Authorization: Bearer
 
 + Attributes
     + file (object) - El documento
     + name (string) - Nombre del documento
-    + owner (object) - Un usuario
-    + project (object) - Un proyecto
+    + project (string) - Un proyecto existente
     
 + Response 201 (application/json)
     + Body
     
             {
-                "file": "Mi Documento"
+                "file": null
                 "project": "Mi proyecto"
             }
+            
++ Response 409
+    + Body
+    
+            {
+                "error": "El nombre del documento ya existe"
+            }
+            
++ Response 401
+    + Body
+    
+            {
+                "error": "El usuario no tiene permisos para hacer esta accion"
+            }
+            
++ Response 400 (application/json)
+    Cuando algún parámetro se manda de forma errónea
+    + Body
 
-### Create Metadata [POST /crear-md-proyecto-nor]
+### Create Metadata [POST /gestion/crear-md-proyecto-nor]
 
 Agrega los metadatos deseados por el usuario que tenga las credenciales necesarias
 
++ Request
+    + Headers
+    
+            Authorization: Bearer
+
 + Attributes
     + name (string) - Nombre del metadato
-    + project (object) - Projecto al que pertenece el documento donde se agregará el metadato
+    + project (string) - Projecto al que pertenece el documento donde se agregará el metadato
     
 + Response 201 (application/json)
     + Body
@@ -86,8 +135,19 @@ Agrega los metadatos deseados por el usuario que tenga las credenciales necesari
                 "name": "nuevo metadato"
                 "project": "Mi proyecto"
             }
+            
++ Response 401 (application/json)
+    + Body
+    
+            {
+                "error": "El usuario no tiene permisos para hacer esta accion"
+            }
+            
++ Response 400 (application/json)
+    Cuando algún parámetro se manda de forma errónea
+    + Body
 
-### Create Parallel Project [POST /crear-proyecto-paralelo]
+### Create Parallel Project [POST /gestion/crear-proyecto-paralelo]
 
 Crea un nuevo proyecto paralelo
 
@@ -102,7 +162,7 @@ Crea un nuevo proyecto paralelo
                 "name": "Mi proyecto paralelo"
             }
 
-### Create Parallel Metadata [POST /crear-md-proyecto-par]
+### Create Parallel Metadata [POST /gestion/crear-md-proyecto-par]
 
 Agrega los metadatos deseados por el usuario que tenga las credenciales necesarias en un proyecto paralelo
 
@@ -118,7 +178,7 @@ Agrega los metadatos deseados por el usuario que tenga las credenciales necesari
                 "proyecto" "Mi proyecto paralelo"
             }
 
-### Document-Metadata Relation [POST /rel-doc-metadato]
+### Document-Metadata Relation [POST /gestion/rel-doc-metadato]
 
 Establece una relación entre el documento y el o los metadatos
 
@@ -126,3 +186,46 @@ Establece una relación entre el documento y el o los metadatos
     + metadata (string)
     + document
     + data
+
+
+## group Delete Methods
+
+### Remove Project [POST /gestion/borrar-proyecto]
+
+Borra un proyecto
+
++ Request
+    + Headers
+    
+            Authorization: Bearer
+            
++ Attributes
+    + name (string) - Nombre del documento
+    + project (string) - Nombre del proyecto al que pertenece
+    
++ Response 202 (aplication/json)
+    + Body
+    
+            {
+                "name": "pdf-sample.pdf",
+                "project": "Mi proyecto"
+            }
+
+<!-- Problema con esta respuesta -->           
++ Response 404 (application/json)
+
++ Response 401 (application/json)
+    + Body
+    
+            {
+                "error": "El usuario no tiene permiso para realizar esta accion"
+            }
+            
++ Response 400 (application/json)
+    Cuando algún parámetro se manda de forma errónea
+    + Body
+
+
+
+
+
