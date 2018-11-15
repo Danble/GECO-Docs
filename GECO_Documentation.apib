@@ -151,16 +151,24 @@ Agrega los metadatos deseados por el usuario que tenga las credenciales necesari
 
 Crea un nuevo proyecto paralelo
 
-+ Attributes
-    + owner (object) - Un usuario
-    + name (string) - Nombre del proyecto paralelo
++ Request
+    + Headers
     
+            Authorization: Bearer
+
++ Attributes
+    + name (string) - Nombre del proyecto paralelo
+
 + Response 201 (application/json)
     + Body
     
             {
                 "name": "Mi proyecto paralelo"
             }
+
+          
+<!-- problema con esta respuesta -->           
++ Response 409
 
 ### Create Parallel Metadata [POST /gestion/crear-md-proyecto-par]
 
@@ -178,6 +186,9 @@ Agrega los metadatos deseados por el usuario que tenga las credenciales necesari
                 "proyecto" "Mi proyecto paralelo"
             }
 
+
+<!-- Incompleto -->
+
 ### Document-Metadata Relation [POST /gestion/rel-doc-metadato]
 
 Establece una relación entre el documento y el o los metadatos
@@ -190,9 +201,9 @@ Establece una relación entre el documento y el o los metadatos
 
 ## group Delete Methods
 
-### Remove Project [POST /gestion/borrar-proyecto]
+### Remove Document [POST /gestion/borrar-documento/]
 
-Borra un proyecto
+Borra un documento
 
 + Request
     + Headers
@@ -226,6 +237,44 @@ Borra un proyecto
     + Body
 
 
+<!-- Algo anda mal con el User -->  
+### Remove Project [POST /gestion/]
+
+Borra un proyecto
 
 
+### Remove Metadata [POST /gestion/borrar-md-proyecto-nor/]
 
+Borra un metadato
+
++ Request
+    + Headers
+    
+            Authorization: Bearer
+            
++ Attributes
+    + name (string) - Nombre del metadato a borrar
+    + project (string) - Nombre del proyecto al que pertenece
+    
++ Response 202 (application/json)
+    + Body
+    
+            {
+                "name": "metadato",
+                "project": "Mi proyecto"
+            }
+
+
+<!-- Problema con esta respuesta -->           
++ Response 404 (application/json)
+
++ Response 401 (application/json)
+    + Body
+    
+            {
+                "error": "El usuario no tiene permiso para realizar esta accion"
+            }
+            
++ Response 400 (application/json)
+    Cuando algún parámetro se manda de forma errónea
+    + Body
