@@ -25,7 +25,7 @@ Una vez que el usuario queda registrado se crea un token con el que se registrar
 
 ### Create User [POST /gestion/registro-usuario]
 
-Crea un nuevo usuario mientras no exista el nombre y/o este resgistrado el correo electrónico
+Crea un nuevo usuario mientras no exista el nombre y/o esté registrado el correo electrónico
 
 + Attributes
     + email (string) - Correo electrónico del usuario
@@ -73,7 +73,15 @@ Crea un nuevo proyecto
           
 <!-- problema con esta respuesta -->           
 + Response 409
-
+    + Body
+    
+            {
+                "error": "El nombre de usuario o correo ya existe"
+            }
+            
++ Response 400 (application/json)
+    Cuando algún parámetro se manda de forma errónea
+    + Body
 
 ### Upload Document [POST /gestion/upload1]
 
@@ -146,48 +154,52 @@ Agrega los metadatos deseados por el usuario que tenga las credenciales necesari
 + Response 400 (application/json)
     Cuando algún parámetro se manda de forma errónea
     + Body
+    
 
-### Create Parallel Project [POST /gestion/crear-proyecto-paralelo]
+    
+### Relation Metadata-Document [POST /gestion/rel-doc-metadato]
 
-Crea un nuevo proyecto paralelo
+Crea automáticamente una relación entre un documento con un metadato
 
 + Request
     + Headers
     
             Authorization: Bearer
-
+            
 + Attributes
-    + name (string) - Nombre del proyecto paralelo
-
-+ Response 201 (application/json)
-    + Body
-    
-            {
-                "name": "Mi proyecto paralelo"
-            }
-
-          
-<!-- problema con esta respuesta -->           
-+ Response 409
-
-### Create Parallel Metadata [POST /gestion/crear-md-proyecto-par]
-
-Agrega los metadatos deseados por el usuario que tenga las credenciales necesarias en un proyecto paralelo
-
-+ Attributes
-    + name (string) - Nombre del metadato
-    + project (object) - Projecto paralelo al que pertenece el documento donde se agregará el metadato
+    + metadata (string) - Nombre del metadato
+    + document (string) - Nombre del documento
+    + project (string) - Nombre del proyecto donde se encuentran ambos
+    + data (string) - ID o nombre de la relación
     
 + Response 201 (application/json)
     + Body
     
             {
-                "name": "nuevo metadato",
-                "proyecto" "Mi proyecto paralelo"
+                "project": "Mi proyecto",
+                "metadata": "metadato nuevo",
+                "document": "example.pdf",
+                "data": "data"
             }
+            
++ Response 404 (application/json)
+    + Body
+    
+            {
+                "error": "El metadato no fue encontrado"
+            }
+            
++ Response 404 (application/json)
+    + Body
+    
+            {
+                "error": "El documento no fue encontrado"
+            }
+            
++ Response 400 (application/json)
+    Cuando algún parámetro se manda de forma errónea
+    + Body
 
-
-<!-- Incompleto -->
 
 ### Document-Metadata Relation [POST /gestion/rel-doc-metadato]
 
@@ -222,8 +234,13 @@ Borra un documento
                 "project": "Mi proyecto"
             }
 
-<!-- Problema con esta respuesta -->           
 + Response 404 (application/json)
+    + Body
+    
+            {
+                "error": "El documento no fue encontrado"
+            }
+            
 
 + Response 401 (application/json)
     + Body
@@ -237,11 +254,42 @@ Borra un documento
     + Body
 
 
-<!-- Algo anda mal con el User -->  
 ### Remove Project [POST /gestion/]
 
 Borra un proyecto
 
++ Request
+    + Headers
+    
+            Authorization: Bearer
+            
++ Attributes
+    + project (string) - Nombre del proyecto
+    
++ Response 202 (aplication/json)
+    + Body
+            
+            {
+                "project": "Mi proyecto"
+            }
+    
++ Response 404 (application/json)
+    + Body
+    
+            {
+                "error": "El proyecto no fue encontrado"
+            }
+            
++ Response 401 (application/json)
+    + Body
+    
+            {
+                "error": "El usuario no tiene permiso para realizar esta accion"
+            }
+            
++ Response 400 (application/json)
+    Cuando algún parámetro se manda de forma errónea
+    + Body
 
 ### Remove Metadata [POST /gestion/borrar-md-proyecto-nor/]
 
@@ -264,15 +312,61 @@ Borra un metadato
                 "project": "Mi proyecto"
             }
 
-
-<!-- Problema con esta respuesta -->           
 + Response 404 (application/json)
+    + Body
+            {
+                "error": "El metadato no fue encontrado"
+            }
 
 + Response 401 (application/json)
     + Body
     
             {
                 "error": "El usuario no tiene permiso para realizar esta accion"
+            }
+            
++ Response 400 (application/json)
+    Cuando algún parámetro se manda de forma errónea
+    + Body
+    
+
+### Remove Metadata-Document Relation  [POST /gestion/borrar-doc-nor-meta-rel/]
+
+Borra un la relación de un documento con su metadato
+
++ Request
+    + Headers
+    
+            Authorization: Bearer
+
++ Attributes
+    + metadata (string) - Nombre del metadato
+    + document (string) - Nombre del documento
+    + project (string) - Nombre del proyecto
+
++ Response 202 (application/json)
+    + Body
+    
+            {
+                "project": "Mi proyecto",
+                "metadata": "metadato",
+                "document": "example.pdf"
+            }
+
+<!-- Hay un problema con esta respuesta, devuelve error de servidor en su lugar --> 
++ Response 404 (application/json)
+    + Body
+    
+            {
+                "error": "El metadato o documento no fue encontrado"
+            }
+
+<!-- La respuesta es distinta a la programada -->
++ Response 401 (application/json)
+    + Body
+    
+            {
+                "detail": "Error decoding signature."
             }
             
 + Response 400 (application/json)
