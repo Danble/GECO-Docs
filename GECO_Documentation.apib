@@ -3,6 +3,8 @@ FORMAT: 1A
 
 Gestor de Corpus
 
+<!-- Faltan los parámetros nuevos para registrarse que agregará Ángel -->
+
 ## group Authentication
 
 ### Get an access token [POST /api-token-auth/]
@@ -58,25 +60,72 @@ Crea un nuevo proyecto
 + Request
     + Headers
     
-            Authorization: Bearer
+            Authorization: Bearer [Token]
 
 + Attributes
     + name (string) - Nombre del proyecto
+    + is_collab (optional, boolean) - Pertenece a proyecto colaborativo
+    + is_public (optional, boolean) - Pertenece a proyecto público
+    + metadata_list (array) - Lista de metadatos
 
 + Response 201 (application/json)
     + Body
     
             {
-                "name": "Mi proyecto"
+                "name": "Mi proyecto",
+                "metadata_list": [
+                    "metadato 1",
+                    "metadato 2"
+                ],
+                "is_collab": true,
+                "is_public": false
             }
 
           
-<!-- problema con esta respuesta -->           
 + Response 409
     + Body
     
             {
-                "error": "El nombre de usuario o correo ya existe"
+                "error": "El nombre del proyecto ya existe"
+            }
+            
++ Response 400 (application/json)
+    Cuando algún parámetro se manda de forma errónea
+    + Body
+
+### Add Collaborator [POST /gestion/add-collab-proy]
+
+Adhiere un colaborador a un proyecto
+
++ Request
+    + Headers
+    
+            Authorization: Bearer [Token]
+            
++ Attributes
+    + user (string) - El nuevo colaborador
+    + project (string) - El proyecto al que se unirá
+    
++ Response 202 (application/json)
+    + Body
+    
+            {
+                "project": "nuevo proyecto",
+                "user": "Pepe"
+            }
+            
++ Response 404 (application/json)
+    + Body
+    
+            {
+                "error": "El proyecto no fue encontrado" // "error": "El usuario no fue encontrado"
+            }
+            
++ Response 401 (application/json)
+    + Body
+    
+            {
+                "detail": "Error decoding signature."
             }
             
 + Response 400 (application/json)
@@ -90,11 +139,10 @@ Sube documentos al proyecto
 + Request
     + Headers
     
-            Authorization: Bearer
+            Authorization: Bearer [Token]
 
 + Attributes
     + file (object) - El documento
-    + name (string) - Nombre del documento
     + project (string) - Un proyecto existente
     
 + Response 201 (application/json)
@@ -116,7 +164,7 @@ Sube documentos al proyecto
     + Body
     
             {
-                "error": "El usuario no tiene permisos para hacer esta accion"
+                "detail": "Error decoding signature."
             }
             
 + Response 400 (application/json)
@@ -130,7 +178,7 @@ Agrega los metadatos deseados por el usuario que tenga las credenciales necesari
 + Request
     + Headers
     
-            Authorization: Bearer
+            Authorization: Bearer [Token]
 
 + Attributes
     + name (string) - Nombre del metadato
@@ -164,7 +212,7 @@ Crea automáticamente una relación entre un documento con un metadato
 + Request
     + Headers
     
-            Authorization: Bearer
+            Authorization: Bearer [Token]
             
 + Attributes
     + metadata (string) - Nombre del metadato
@@ -186,29 +234,273 @@ Crea automáticamente una relación entre un documento con un metadato
     + Body
     
             {
-                "error": "El metadato no fue encontrado"
-            }
-            
-+ Response 404 (application/json)
-    + Body
-    
-            {
-                "error": "El documento no fue encontrado"
+                "error": "El metadato no fue encontrado" // "error": "El documento no fue encontrado"
             }
             
 + Response 400 (application/json)
     Cuando algún parámetro se manda de forma errónea
     + Body
 
+### Change Status Project [POST /gestion/cambiar-status-proyn]
 
-### Document-Metadata Relation [POST /gestion/rel-doc-metadato]
+Cambia el estado del proyecto de público a privado o viceversa
 
-Establece una relación entre el documento y el o los metadatos
++ Request
+    + Headers
+    
+            Authorization: Bearer [Token]
+            
++ Attributes
+    + project (string) - Nombre del proyecto
+    
++ Response 202 (application/json)
+    + Body
+    
+            {
+                "project": "Mi proyecto"
+            }
+            
++ Response 401 (application/json)
+    + Body
+        
+            {
+                "detail": "Error decoding signature."
+            }
+
++ Response 404 (application/json)
+    + Body
+    
++ Response 400 (application/json)
+    Cuando algún parámetro se manda de forma errónea
+    + Body
+
+### List of File Projects [POST /gestion/list-docs-proy]
+
+Regresa una lista de objetos. Cada objeto contiene los datos de los archivos en un determinado proyecto
+
++ Request
+    + Headers
+    
+            Authorization: Bearer [Token]
+            
++ Attributes
+    + project (string) - Nombre del proyecto
+
++ Response 202 (application/json)
+    + Body
+    
+            [
+                [
+                    {
+                        "name": "uno_t4FZJ4C.txt",
+                        "owner": "test@example.com",
+                        "metadata": {}
+                    }
+                ],
+                [
+                    {
+                        "name": "dos_lTYuz60.txt",
+                        "owner": "test@example.com",
+                        "metadata": {}
+                    }
+                ],
+                [
+                    {
+                        "name": "tres_tSaThJ7.txt",
+                        "owner": "test@example.com",
+                        "metadata": {}
+                    }
+                ],
+                [
+                    {
+                        "name": "cuatro_pV4xahO.txt",
+                        "owner": "test@example.com",
+                        "metadata": {}
+                    }
+                ]
+            ]
+
++ Response 401 (application/json)
+    + Body
+        
+            {
+                "detail": "Error decoding signature."
+            }
+
+<!-- Problema con esta respuesta. Devuelve un error 500 -->            
++ Response 404 (application/json)
+    + Body
+    
++ Response 400 (application/json)
+    Cuando algún parámetro se manda de forma errónea
+    + Body
+    
+
+### List of Own Projects [POST /gestion/list-proy-own]
+
+Regresa una lista de objetos. Cada objeto contiene los datos de los proyectos que son propiedad del usuario autenticado, y los acomoda poniendo hasta el final de la lista el último que ha sido modificado
+
++ Request
+    + Headers
+    
+            Authorization: Bearer [Token]
+
+<!-- Acepta cualquier nombre de usuario. Podría respresentar riesgo de seguridad? -->            
++ Attributes
+    + user (string) - Nombre del usuario
+
++ Response 202 (application/json)
+    + Body
+    
+            [
+                {
+                    "name": "Mi proyecto",
+                    "public": false,
+                    "collab": false
+                },
+                {
+                    "name": "Mi proyecto 2",
+                    "public": false,
+                    "collab": false
+                },
+                {
+                    "name": "Mi proyecto 4",
+                    "public": false,
+                    "collab": false
+                },
+                {
+                    "name": "nuevo proyecto",
+                    "public": false,
+                    "collab": false
+                }
+            ]
+            
++ Response 401 (application/json)
+    + Body
+        
+            {
+                "detail": "Error decoding signature."
+            }
+
+
+<!-- Problema con esta respuesta. Devuelve un error 500 -->            
++ Response 404 (application/json)
+    + Body
+    
++ Response 400 (application/json)
+    Cuando algún parámetro se manda de forma errónea
+    + Body
+    
+
+### Get Project Metadata [POST /gestion/get-proy-md]
+
+Regresa una lista de objetos. Cada objeto contiene la lista de los metadatos del proyecto
+
++ Request
+    + Headers
+    
+            Authorization: Bearer [Token]
 
 + Attributes
-    + metadata (string)
-    + document
-    + data
+    + project (string) - Nombre del proyecto
+    
++ Response 200 (application/json)
+    + Body
+    
+            {
+                "metadata": [
+                    "metadato 1",
+                    "metadato 2"
+                ]
+            }
+            
++ Response 404 (application/json)
+    + Body
+    
+            {
+                "error": "no se encontró el proyecto" // "error": "no se encontraron metadatos"
+            }
+    
++ Response 400 (application/json)
+    Cuando algún parámetro se manda de forma errónea
+    + Body
+    
+
+### Part-of-speech tagging [POST /gestion/pos-tag-file]
+
+Crea el etiquetado PoS en un determinado documento perteneciente a un proyecto
+
++ Request
+    + Headers
+    
+            Authorization: Bearer [Token]
+
++ Attributes
+    + project (string) - Nombre del proyecto
+    + document (string) - Nombre del documento
+    
++ Response 201 (application/json)
+    + Body
+    
+            {
+                "exito": "Taggeo Terminado"
+            }
+            
++ Response 401 (application/json)
+    + Body
+        
+            {
+                "detail": "Error decoding signature."
+            }
+
++ Response 404 (application/json)
+    + Body
+    
+            {
+                "error": "El proyecto no fue encontrado" // "error": "El documento no fue encontrado"
+            }
+    
++ Response 400 (application/json)
+    Cuando algún parámetro se manda de forma errónea
+    + Body
+
+<!-- Se modificará y se necesita considerar el caso en el que un documento no haya sido etiquetado previamente aunque exista
+porque da error de servidor-->
+### Download PoS Tags Document [POST /gestion/download-file]
+
+Descarga el archivo después del etiquetado
+
++ Request
+    + Headers
+    
+            Authorization: Bearer [Token]
+
++ Attributes
+    + project (string) - Nombre del proyecto
+    + document (string) - Nombre del documento
+    
++ Response 200 (application/json)
+    + Body
+    
+            Devuelve un archivo TSV
+            
++ Response 401 (application/json)
+    + Body
+        
+            {
+                "detail": "Error decoding signature."
+            }
+
++ Response 404 (application/json)
+    + Body
+    
+            {
+                "error": "El proyecto no fue encontrado" // "error": "El documento no fue encontrado"
+            }
+    
++ Response 400 (application/json)
+    Cuando algún parámetro se manda de forma errónea
+    + Body
 
 
 ## group Delete Methods
@@ -220,7 +512,7 @@ Borra un documento
 + Request
     + Headers
     
-            Authorization: Bearer
+            Authorization: Bearer [Token]
             
 + Attributes
     + name (string) - Nombre del documento
@@ -261,7 +553,7 @@ Borra un proyecto
 + Request
     + Headers
     
-            Authorization: Bearer
+            Authorization: Bearer [Token]
             
 + Attributes
     + project (string) - Nombre del proyecto
@@ -298,7 +590,7 @@ Borra un metadato
 + Request
     + Headers
     
-            Authorization: Bearer
+            Authorization: Bearer [Token]
             
 + Attributes
     + name (string) - Nombre del metadato a borrar
@@ -337,7 +629,7 @@ Borra un la relación de un documento con su metadato
 + Request
     + Headers
     
-            Authorization: Bearer
+            Authorization: Bearer [Token]
 
 + Attributes
     + metadata (string) - Nombre del metadato
